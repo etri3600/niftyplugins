@@ -406,14 +406,14 @@ namespace Aurora
 				// to ask the registry...
 				string installRoot = null;
 				string candidate = @"C:\Program Files\Perforce";
-				if (System.IO.Directory.Exists(candidate))
+				if (System.IO.Directory.Exists(candidate) && System.IO.File.Exists(Path.Combine(candidate, "p4.exe")))
 				{
 					installRoot = candidate;
 				}
 
 				if( null == installRoot )
 				{
-					installRoot = GetRegistryValue("SOFTWARE\\Perforce\\Environment", "P4INSTROOT", true); ;
+					installRoot = GetRegistryValue("SOFTWARE\\Perforce\\Environment", "P4INSTROOT", true);
 
 					if (null == installRoot)
 					{
