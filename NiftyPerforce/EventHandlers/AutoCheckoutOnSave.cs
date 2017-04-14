@@ -1,16 +1,50 @@
 // Copyright (C) 2006-2010 Jim Tilander. See COPYING for and README for more details.
 using System;
-using System.IO;
 using EnvDTE;
-using EnvDTE80;
-using System.Collections.Generic;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using System.Linq;
 
 namespace Aurora
 {
 	namespace NiftyPerforce
 	{
+		// Create a class to retrieve the OnBeforeSave event from VS
+		// http://schmalls.com/2015/01/19/adventures-in-visual-studio-extension-development-part-2
+		internal class RunningDocTableEvents : IVsRunningDocTableEvents3
+		{
+			private AutoCheckoutOnSave autoCheckoutOnSave;
+
+			public RunningDocTableEvents(AutoCheckoutOnSave autoCheckoutOnSave)
+			{
+				this.autoCheckoutOnSave = autoCheckoutOnSave;
+			}
+
+			public int OnBeforeSave(uint docCookie)
+			{
+				RunningDocumentInfo runningDocumentInfo = autoCheckoutOnSave._rdt.Value.GetDocumentInfo(docCookie);
+				autoCheckoutOnSave.OnBeforeSave(runningDocumentInfo.Moniker);
+				return VSConstants.S_OK;
+			}
+
+			////////////////////////////////////////////////////////////////////
+			// default implementation for the pure methods, return OK
+			public int OnAfterAttributeChange(uint docCookie, uint grfAttribs){return VSConstants.S_OK;}
+			public int OnAfterAttributeChangeEx(uint docCookie, uint grfAttribs, IVsHierarchy pHierOld, uint itemidOld, string pszMkDocumentOld, IVsHierarchy pHierNew, uint itemidNew, string pszMkDocumentNew){return VSConstants.S_OK;}
+			public int OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame){return VSConstants.S_OK;}
+			public int OnAfterFirstDocumentLock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining){return VSConstants.S_OK;}
+			public int OnAfterSave(uint docCookie){return VSConstants.S_OK;}
+			public int OnBeforeDocumentWindowShow(uint docCookie, int fFirstShow, IVsWindowFrame pFrame){return VSConstants.S_OK;}
+			public int OnBeforeLastDocumentUnlock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining){return VSConstants.S_OK;}
+		}
+
 		class AutoCheckoutOnSave : PreCommandFeature
 		{
+			internal DTE _dte;
+			internal readonly Lazy<RunningDocumentTable> _rdt;
+			internal readonly Lazy<Microsoft.VisualStudio.OLE.Interop.IServiceProvider> _sp;
+
 			public AutoCheckoutOnSave(Plugin plugin)
 				: base(plugin, "AutoCheckoutOnSave", "Automatically checks out files on save")
 			{
@@ -18,8 +52,15 @@ namespace Aurora
 					return;
 
 				Log.Info("Adding handlers for automatically checking out dirty files when you save");
-				RegisterHandler("File.SaveSelectedItems", OnSaveSelected);
-				RegisterHandler("File.SaveAll", OnSaveAll);
+				_dte = (DTE)Package.GetGlobalService(typeof(SDTE));
+				_sp = new Lazy<Microsoft.VisualStudio.OLE.Interop.IServiceProvider>(() => Package.GetGlobalService(typeof(Microsoft.VisualStudio.OLE.Interop.IServiceProvider)) as Microsoft.VisualStudio.OLE.Interop.IServiceProvider);
+				_rdt = new Lazy<RunningDocumentTable>(() => new RunningDocumentTable(new ServiceProvider(_sp.Value)));
+				_rdt.Value.Advise(new RunningDocTableEvents(this));
+			}
+
+			internal void OnBeforeSave(string filename)
+			{
+				P4Operations.EditFileImmediate(mPlugin.OutputPane, filename);
 			}
 
 			private void OnSaveSelected(string Guid, int ID, object CustomIn, object CustomOut, ref bool CancelDefault)
