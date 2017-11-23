@@ -286,17 +286,24 @@ namespace Aurora
 							string output = Process.Execute("p4", dir, "-s -L \"{0}\" info", dir);
 							Regex userpattern = new Regex(@"User name: (?<user>.*)$", RegexOptions.Compiled | RegexOptions.Multiline);
 							Regex portpattern = new Regex(@"Server address: (?<port>.*)$", RegexOptions.Compiled | RegexOptions.Multiline);
+							Regex brokerpattern = new Regex(@"Broker address: (?<port>.*)$", RegexOptions.Compiled | RegexOptions.Multiline);
 							Regex clientpattern = new Regex(@"Client name: (?<client>.*)$", RegexOptions.Compiled | RegexOptions.Multiline);
 
 							Match usermatch = userpattern.Match(output);
 							Match portmatch = portpattern.Match(output);
+							Match brokermatch = brokerpattern.Match(output);
 							Match clientmatch = clientpattern.Match(output);
 
 							string port = portmatch.Groups["port"].Value.Trim();
+							string broker = brokermatch.Groups["port"].Value.Trim();
 							string username = usermatch.Groups["user"].Value.Trim();
 							string client = clientmatch.Groups["client"].Value.Trim();
 
-							string ret = string.Format(" -p {0} -u {1} -c {2} ", port, username, client);
+							string server = broker;
+							if (string.IsNullOrEmpty(server))
+								server = port;
+
+							string ret = string.Format(" -p {0} -u {1} -c {2} ", server, username, client);
 
 							Log.Debug("GetUserInfoStringFull : " + ret);
 
