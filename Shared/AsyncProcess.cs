@@ -8,11 +8,11 @@ namespace Aurora
 {
 	public static class AsyncProcess
 	{
-        private static int s_defaultTimeout = 30000; // in ms
+		private static int s_defaultTimeout = 30000; // in ms
 
-        public delegate void OnDone(bool ok, object arg0);
+		public delegate void OnDone(bool ok, object arg0);
 
-        public static void Init()
+		public static void Init()
 		{
 			m_helperThread = new System.Threading.Thread(new ThreadStart(ThreadMain));
 			m_helperThread.Start();
@@ -23,41 +23,41 @@ namespace Aurora
 			m_helperThread.Abort();
 		}
 
-        public static bool Run(OutputWindowPane output, string executable, string commandline, string workingdir, OnDone callback, object callbackArg)
+		public static bool Run(OutputWindowPane output, string executable, string commandline, string workingdir, OnDone callback, object callbackArg)
 		{
 			int timeout = 1000;
 
-            if (!RunCommand(output, executable, commandline, workingdir, timeout))
-            {
-                Log.Debug("Failed to run immediate (process hung?), trying again on a remote thread: " + commandline);
-                return Schedule(output, executable, commandline, workingdir, callback, callbackArg);
-            }
-            else
-            {
-                if (null != callback)
-                {
-                    callback(true, callbackArg);
-                }
-            }
+			if (!RunCommand(output, executable, commandline, workingdir, timeout))
+			{
+				Log.Debug("Failed to run immediate (process hung?), trying again on a remote thread: " + commandline);
+				return Schedule(output, executable, commandline, workingdir, callback, callbackArg);
+			}
+			else
+			{
+				if (null != callback)
+				{
+					callback(true, callbackArg);
+				}
+			}
 
 			return true;
 		}
 
-        public static bool Schedule(OutputWindowPane output, string executable, string commandline, string workingdir, OnDone callback, object callbackArg)
-        {
-            return Schedule(output, executable, commandline, workingdir, callback, callbackArg, s_defaultTimeout);
-        }
+		public static bool Schedule(OutputWindowPane output, string executable, string commandline, string workingdir, OnDone callback, object callbackArg)
+		{
+			return Schedule(output, executable, commandline, workingdir, callback, callbackArg, s_defaultTimeout);
+		}
 
-        public static bool Schedule(OutputWindowPane output, string executable, string commandline, string workingdir, OnDone callback, object callbackArg, int timeout)
+		public static bool Schedule(OutputWindowPane output, string executable, string commandline, string workingdir, OnDone callback, object callbackArg, int timeout)
 		{
 			CommandThread cmd = new CommandThread();
 			cmd.output = output;
 			cmd.executable = executable;
 			cmd.commandline = commandline;
 			cmd.workingdir = workingdir;
-            cmd.callback = callback;
-            cmd.callbackArg = callbackArg;
-            cmd.timeout = timeout;
+			cmd.callback = callback;
+			cmd.callbackArg = callbackArg;
+			cmd.timeout = timeout;
 
 			try
 			{
@@ -70,7 +70,7 @@ namespace Aurora
 			}
 
 			m_startEvent.Release();
-			Log.Debug("Scheduled {0} {1}\n", cmd.executable, cmd.commandline);
+			Log.Info("Scheduled {0} {1}\n", cmd.executable, cmd.commandline);
 			return true;
 		}
 
@@ -118,25 +118,25 @@ namespace Aurora
 			public string commandline = "";
 			public string workingdir = "";
 			public OutputWindowPane output = null;
-            public OnDone callback = null;
-            public object callbackArg = null;
-            public int timeout = 10000;
+			public OnDone callback = null;
+			public object callbackArg = null;
+			public int timeout = 10000;
 			public void Run()
 			{
-                try
-                {
+				try
+				{
 
-                    bool ok = RunCommand(output, executable, commandline, workingdir, timeout);
+					bool ok = RunCommand(output, executable, commandline, workingdir, timeout);
 
-                    if (null != callback)
-                    {
-                        callback(ok, callbackArg);
-                    }
-                }
-                catch
-                {
-                    Log.Error("Caught unhandled exception in async process -- supressing so that we don't bring down Visual Studio");
-                }
+					if (null != callback)
+					{
+						callback(ok, callbackArg);
+					}
+				}
+				catch
+				{
+					Log.Error("Caught unhandled exception in async process -- supressing so that we don't bring down Visual Studio");
+				}
 			}
 		}
 
@@ -173,11 +173,11 @@ namespace Aurora
 					return false;
 				}
 
-                if (0 == timeout)
-                {
-                    // Fire and forget task.
-                    return true;
-                }
+				if (0 == timeout)
+				{
+					// Fire and forget task.
+					return true;
+				}
 				
 				bool exited = false;
 				string alloutput = "";
@@ -192,10 +192,10 @@ namespace Aurora
 					exited = process.WaitForExit(timeout);
 
 					/*
-                     * This causes the plugin to unexpectedly crash, since it brings the entire thread down, and thus the entire environment?!?
-                     * 
-                    
-                    if (0 != process.ExitCode)
+					 * This causes the plugin to unexpectedly crash, since it brings the entire thread down, and thus the entire environment?!?
+					 * 
+					
+					if (0 != process.ExitCode)
 					{
 						throw new Process.Error("Failed to execute {0} {1}, exit code was {2}", executable, process.StartInfo.Arguments, process.ExitCode);
 					}*/
@@ -208,7 +208,7 @@ namespace Aurora
 				if(!exited)
 				{
 					Log.Info("{0}: {1} timed out ({2} ms)", executable, commandline, timeout);
-                    process.Kill();
+					process.Kill();
 					return false;
 				}
 				else
