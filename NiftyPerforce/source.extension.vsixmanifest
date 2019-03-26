@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="NiftyPerforce.Tilander.eb29cef1-a8b5-41b1-922d-6ba8cec91ef4" Version="2.0.3" Language="en-US" Publisher="Jim Tilander" />
+    <Identity Id="NiftyPerforce.Tilander.eb29cef1-a8b5-41b1-922d-6ba8cec91ef4" Version="2.0.4" Language="en-US" Publisher="Jim Tilander" />
     <DisplayName>NiftyPerforce</DisplayName>
     <Description xml:space="preserve">Simple Perforce integration for Visual Studio</Description>
     <MoreInfo>https://github.com/jtilander/niftyplugins</MoreInfo>
@@ -9,8 +9,7 @@
     <Tags>perforce</Tags>
   </Metadata>
   <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[11.0,15.0]" />
-    <InstallationTarget Version="[11.0,15.0)" Id="Microsoft.VisualStudio.Pro" />
+    <InstallationTarget Version="[11.0,17.0)" Id="Microsoft.VisualStudio.Pro" />
   </Installation>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
