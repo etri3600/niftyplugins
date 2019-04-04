@@ -462,6 +462,12 @@ namespace Aurora
 						Log.Info("Found p4 custom diff");
 						g_p4customdiff = true;
 					}
+					p4diff = System.Environment.GetEnvironmentVariable("P4DIFF");
+					if(null != p4diff)
+					{
+						Log.Info("Found p4 custom diff");
+						g_p4customdiff = true;
+					}
 				}
 				else
 				{
