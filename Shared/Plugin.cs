@@ -212,7 +212,7 @@ namespace Aurora
 			if(null != result)
 				return result;
 
-			OutputWindow outputWindow = (OutputWindow)app.Windows.Item(Constants.vsWindowKindOutput).Object;
+			OutputWindow outputWindow = (OutputWindow)app.Windows.Item(EnvDTE.Constants.vsWindowKindOutput).Object;
 			OutputWindowPanes panes = outputWindow.OutputWindowPanes;
 			return panes.Add(name);
 		}
@@ -222,7 +222,7 @@ namespace Aurora
 			if("" == name)
 				return null;
 
-			OutputWindow outputWindow = (OutputWindow)app.Windows.Item(Constants.vsWindowKindOutput).Object;
+			OutputWindow outputWindow = (OutputWindow)app.Windows.Item(EnvDTE.Constants.vsWindowKindOutput).Object;
 			OutputWindowPanes panes = outputWindow.OutputWindowPanes;
 
 			foreach(OutputWindowPane pane in panes)
