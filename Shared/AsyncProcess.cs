@@ -123,20 +123,18 @@ namespace Aurora
 			public int timeout = 10000;
 			public void Run()
 			{
+				bool ok = false;
 				try
 				{
-
-					bool ok = RunCommand(output, executable, commandline, workingdir, timeout);
-
-					if (null != callback)
-					{
-						callback(ok, callbackArg);
-					}
+					ok = RunCommand(output, executable, commandline, workingdir, timeout);
 				}
 				catch
 				{
+					ok = false;
 					Log.Error("Caught unhandled exception in async process -- supressing so that we don't bring down Visual Studio");
 				}
+
+				callback?.Invoke(ok, callbackArg);
 			}
 		}
 
