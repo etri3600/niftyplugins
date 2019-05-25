@@ -13,12 +13,12 @@ namespace Aurora
             private bool m_executeForFileItems = true;
             private bool m_executeForProjectItems = true;
 
-			protected ItemCommandBase(string name, string canonicalName, Plugin plugin, string tooltip, bool executeForFileItems, bool executeForProjectItems)
-				: base(name, canonicalName, plugin, tooltip)
+            protected ItemCommandBase(string name, string canonicalName, Plugin plugin, string tooltip, bool executeForFileItems, bool executeForProjectItems)
+                : base(name, canonicalName, plugin, tooltip)
             {
-				m_executeForFileItems = executeForFileItems;
-				m_executeForProjectItems = executeForProjectItems;
-			}
+                m_executeForFileItems = executeForFileItems;
+                m_executeForProjectItems = executeForProjectItems;
+            }
 
             private const string m_fileItemGUID = "{6BB5F8EE-4483-11D3-8BCF-00C04F8EC28C}";
 
@@ -26,13 +26,13 @@ namespace Aurora
             {
                 foreach (SelectedItem sel in Plugin.App.SelectedItems)
                 {
-                    if (m_executeForFileItems && sel.ProjectItem != null && m_fileItemGUID == sel.ProjectItem.Kind.ToUpper())
-                    {
-                        OnExecute(sel, sel.ProjectItem.get_FileNames(0), Plugin.OutputPane);
-                    }
-                    else if (m_executeForFileItems && sel.ProjectItem == null && Plugin.App.ActiveWindow.Type == vsWindowType.vsWindowTypeDocument)
+                    if (m_executeForFileItems && Plugin.App.ActiveWindow.Type == vsWindowType.vsWindowTypeDocument)
                     {
                         OnExecute(sel, Plugin.App.ActiveDocument.FullName, Plugin.OutputPane);
+                    }
+                    else if (m_executeForFileItems && sel.ProjectItem != null && m_fileItemGUID == sel.ProjectItem.Kind.ToUpper())
+                    {
+                        OnExecute(sel, sel.ProjectItem.get_FileNames(0), Plugin.OutputPane);
                     }
                     else if (m_executeForProjectItems && sel.Project != null)
                     {
@@ -40,7 +40,7 @@ namespace Aurora
                     }
                 }
 
-				return true;
+                return true;
             }
 
             public override bool IsEnabled()
