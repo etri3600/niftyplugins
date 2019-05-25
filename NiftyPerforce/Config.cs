@@ -16,14 +16,14 @@ namespace Aurora
 			private bool mEnableBindings = false;
 			private bool m_autoCheckoutOnEdit = false;
 			private bool m_autoCheckoutProject = false;
-			private bool m_autoCheckoutOnSave = false;
+			private bool m_autoCheckoutOnSave = true;
 			private bool m_autoCheckoutOnBuild = false;
-			private bool m_autoAdd = true;
+			private bool m_autoAdd = false;
 			private bool m_autoDelete = false;
 			private bool m_useSystemConnection = true;
 			private bool m_ignoreReadOnlyOnEdit = false;
 			//private bool m_warnOnEditNewerFile = false;
-            private bool m_preferFoolVisualClient = false;      // <<--- use p4v instead of p4win
+            private bool m_preferFoolVisualClient = true;      // <<--- use p4v instead of p4win
 			private string m_port = "";
 			private string m_client = "";
 			private string m_username = "";
