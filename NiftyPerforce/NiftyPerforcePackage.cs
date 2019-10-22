@@ -20,6 +20,9 @@ using Aurora.NiftyPerforce;
 using Aurora;
 using System.Windows.Forms;
 
+using System.Threading;
+using Task = System.Threading.Tasks.Task;
+
 namespace NiftyPerforce
 {
 	/// <summary>
@@ -39,12 +42,12 @@ namespace NiftyPerforce
 	/// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
 	/// </para>
 	/// </remarks>
-	[PackageRegistration(UseManagedResourcesOnly = true)]
+	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 	[InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
-	[ProvideAutoLoad(Microsoft.VisualStudio.VSConstants.UICONTEXT.NoSolution_string)] // Note: the package must be loaded on startup to create and bind commands
+	[ProvideAutoLoad(Microsoft.VisualStudio.VSConstants.UICONTEXT.NoSolution_string, PackageAutoLoadFlags.BackgroundLoad)] // Note: the package must be loaded on startup to create and bind commands
 	[Guid(NiftyPerforcePackage.PackageGuidString)]
 	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
-	public sealed class NiftyPerforcePackage : Package
+	public sealed class NiftyPerforcePackage : AsyncPackage
 	{
 		/// <summary>
 		/// Package GUID string.
@@ -69,18 +72,21 @@ namespace NiftyPerforce
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
 		/// </summary>
-		protected override void Initialize()
+		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
-			base.Initialize();
+			await base.InitializeAsync(cancellationToken, progress);
+
+			// Every plugin needs a command bar.
+			DTE2 application = await base.GetServiceAsync(typeof(DTE)).ConfigureAwait(false) as DTE2;
+			IVsProfferCommands3 profferCommands3 = await base.GetServiceAsync(typeof(SVsProfferCommands)) as IVsProfferCommands3;
+			OleMenuCommandService oleMenuCommandService = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+
+			// Switches to the UI thread in order to consume some services used in command initialization
+			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
 			// Load up the options from file.
 			string optionsFileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NiftyPerforce.xml");
 			Config options = Config.Load(optionsFileName);
-
-			// Every plugin needs a command bar.
-			DTE2 application = GetGlobalService(typeof(DTE)) as DTE2;
-			IVsProfferCommands3 profferCommands3 = base.GetService(typeof(SVsProfferCommands)) as IVsProfferCommands3;
-			OleMenuCommandService oleMenuCommandService = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
 
 			ImageList icons = new ImageList();
 			icons.Images.AddStrip(Properties.Resources.Icons);
@@ -176,7 +182,7 @@ namespace NiftyPerforce
 		/// </summary>
 		private void Cleanup()
 		{
-			IVsProfferCommands3 profferCommands3 = base.GetService(typeof(SVsProfferCommands)) as IVsProfferCommands3;
+			IVsProfferCommands3 profferCommands3 = base.GetServiceAsync(typeof(SVsProfferCommands)) as IVsProfferCommands3;
 			RemoveCommandBar("NiftyPerforceCmdBar", profferCommands3);
 			RemoveCommandBar("NiftyPerforce", profferCommands3);
 
@@ -261,7 +267,7 @@ namespace NiftyPerforce
 				}
 			}
 		}
-		
+
 		private void RemoveCommandBar(string name, IVsProfferCommands3 profferCommands3)
 		{
 			// Remove a command bar and contained controls
