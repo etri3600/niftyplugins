@@ -154,7 +154,7 @@ namespace Aurora
 					return false;
 				if (!System.IO.File.Exists(filename))
 					return false;
-				if(0 == (System.IO.File.GetAttributes(filename) & FileAttributes.ReadOnly))
+				if(0 == (System.IO.File.GetAttributes(filename) & FileAttributes.ReadOnly) && !Singleton<Config>.Instance.ignoreReadOnlyOnEdit)
 					return false;
 				if(!g_p4installed)
 					return NotifyUser("could not find p4 exe installed in perforce directory");
@@ -172,7 +172,7 @@ namespace Aurora
 					return false;
 				if (!System.IO.File.Exists(filename))
 					return false;
-				if (0 == (System.IO.File.GetAttributes(filename) & FileAttributes.ReadOnly))
+				if (0 == (System.IO.File.GetAttributes(filename) & FileAttributes.ReadOnly) && !Singleton<Config>.Instance.ignoreReadOnlyOnEdit)
 					return false;
 				if(!g_p4installed)
 					return NotifyUser("could not find p4 exe installed in perforce directory");
